@@ -3,6 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Key Pals">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0d6d9e">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
 <title>Key Pals – learn the keyboard</title>
 <style>
 :root{--bg:#fff6dc;--ink:#2b2350;--card:#ffffff;--line:#2b2350;--a:#ff5c8a;--b:#2ec4b6;--c:#ffb703;--key:#ffffff;--stage:#cdeeff;
@@ -23,7 +32,7 @@ button:focus-visible{outline:4px solid var(--b);outline-offset:3px}
 .lv.on{background:var(--b);color:#12304a}
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
 .card{background:var(--card);border:4px solid var(--line);border-radius:28px;padding:20px;text-align:center;box-shadow:0 8px 0 var(--line);transition:transform .12s}
-.card:hover{transform:translateY(-4px) rotate(-1deg)}
+@media (hover:hover){.card:hover{transform:translateY(-4px) rotate(-1deg)}}
 .card:active{transform:translateY(4px);box-shadow:0 3px 0 var(--line)}
 .card .e{font-size:4rem;display:block}
 .card b{font-size:1.5rem;display:block;margin:.2em 0}
@@ -188,6 +197,14 @@ main{padding-top:58px}
 #setbtn{position:fixed;top:calc(8px + env(safe-area-inset-top,0px));right:12px;z-index:3;font-size:1.05rem}
 #menu .sub{margin:.3em auto 1em}
 #seabook .sub{margin:.6em auto}
+html{-webkit-text-size-adjust:100%;overscroll-behavior:none}
+*{-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
+html,body,button,select,input{touch-action:manipulation}
+:root{padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+#brand{left:calc(12px + env(safe-area-inset-left,0px))}
+#setbtn{right:calc(12px + env(safe-area-inset-right,0px))}
+@supports (height:1dvh){#stage{height:min(44dvh,380px)}}
+@media (pointer:coarse){.k{width:clamp(30px,8.4vw,76px);height:clamp(42px,8vw,68px);height:clamp(38px,min(8vw,7dvh),68px);font-size:clamp(1rem,3.2vw,1.7rem)}.row{gap:7px}#kb{gap:8px}}
 .k.off{opacity:.25}
 .k.new{box-shadow:0 0 0 4px var(--c)}
 .plv{display:block;font-style:normal;font-weight:800;margin-top:.6em;background:var(--c);color:#2b2350;border-radius:999px;padding:.15em .7em}
@@ -310,7 +327,7 @@ function shake(el){if(!el)return;el.classList.remove('shake');void el.offsetWidt
 function bump(el){if(!el)return;el.classList.remove('bump');void el.offsetWidth;el.classList.add('bump')}
 function hint(k){kb.querySelectorAll('.k').forEach(e=>e.classList.toggle('hint',hintsOn&&e.dataset.k===k))}
 
-['qwertyuiop','asdfghjkl','zxcvbnm'].forEach(r=>{const d=document.createElement('div');d.className='row';[...r].forEach(c=>{const b=document.createElement('button');b.className='k'+('fj'.includes(c)?' home':'');b.dataset.k=c;b.textContent=c;b.tabIndex=-1;b.onclick=()=>press(c);d.append(b)});kb.append(d)});
+['qwertyuiop','asdfghjkl','zxcvbnm'].forEach(r=>{const d=document.createElement('div');d.className='row';[...r].forEach(c=>{const b=document.createElement('button');b.className='k'+('fj'.includes(c)?' home':'');b.dataset.k=c;b.textContent=c;b.tabIndex=-1;b.onpointerdown=e=>{e.preventDefault();press(c)};d.append(b)});kb.append(d)});
 function setupKb(){kb.querySelectorAll('.flash').forEach(e=>e.classList.remove('flash'));const nk=G[cur].all?'':newFor(lvl);kb.querySelectorAll('.k').forEach(e=>{e.classList.toggle('off',!set.includes(e.dataset.k));e.classList.toggle('new',nk.includes(e.dataset.k))})}
 
 function press(k){
@@ -411,7 +428,7 @@ quiz:{all:true,opts:[],ans:null,keys:'fj',lock:0,
   init(){this.lock=0;this.loop();this.next()},
   loop(){sp=setInterval(()=>{if(this.lock&&++this.lock>3)this.next()},700)},
   next(){this.lock=0;const n=lvl<3?2:4;this.keys=n===2?'fj':'dfjk';this.opts=CRE.filter(c=>c[0]!=='fish').sort(()=>Math.random()-.5).slice(0,n);this.ans=rnd(this.opts);this.fa=fact(this.ans);this.draw()},
-  draw(rev){const a=this.ans;stage.innerHTML='<div class="fact">'+(rev?'🎉 It’s the '+dn(a).toLowerCase()+'!<br>'+this.fa:'🤔 Who am I?<br>'+this.fa.replace(new RegExp((a[0]==='whaleshark'?'whale ?shark':a[0])+'(fish)?(es|s)?','gi'),'???'))+'</div><div class="opts">'+this.opts.map((c,i)=>'<div class="opt'+(rev&&c===a?' ok':'')+'"><span>'+(SKMAP[c[0]]?skStatic(SKV[SKMAP[c[0]]]):c[1])+'</span><b>'+this.keys[i].toUpperCase()+'</b></div>').join('')+'</div>'},
+  draw(rev){const a=this.ans;stage.innerHTML='<div class="fact">'+(rev?'🎉 It’s the '+dn(a).toLowerCase()+'!<br>'+this.fa:'🤔 Who am I?<br>'+this.fa.replace(new RegExp((a[0]==='whaleshark'?'whale ?shark':a[0])+'(fish)?(es|s)?','gi'),'???'))+'</div><div class="opts">'+this.opts.map((c,i)=>'<div class="opt'+(rev&&c===a?' ok':'')+'"><span>'+(SKMAP[c[0]]?skStatic(SKV[SKMAP[c[0]]]):c[1])+'</span><b>'+this.keys[i].toUpperCase()+'</b></div>').join('')+'</div>';stage.querySelectorAll('.opt').forEach((el,i)=>{el.onpointerdown=()=>press(this.keys[i])})},
   key(k){if(this.lock)return;const i=this.keys.indexOf(k);
     if(i<0){bad();beep(150);return}
     if(this.opts[i]===this.ans){hit();add(10);play('ding');disc(this.ans[0]);this.lock=1;this.draw(true);say(this.fa)}
@@ -430,7 +447,8 @@ const TRK=[
 {n:'⛵ Sailing Waltz',ms:320,mw:'triangle',md:.3,mv:.055,mel:[7,null,11,14,null,11,9,null,12,16,null,12,7,null,11,14,null,11,9,12,16,14,null,null],bas:{0:-17,3:-5,6:-15,9:-3,12:-17,15:-5,18:-14,21:-7},bd:.4,bv:.07}
 ];
 let mu=null,mstep=0,mtrack=0,mvol=.6,mshuf=false,mnext=0;
-function ctx(){ac=ac||new AudioContext();if(ac.state==='suspended')ac.resume();return ac}
+function ctx(){if(!ac){try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}ac=new (window.AudioContext||window.webkitAudioContext)()}
+  if(ac.state!=='running'){try{const r=ac.resume();if(r&&r.catch)r.catch(()=>{})}catch(e){}}return ac}
 function tone(f,d=.15,type='triangle',v=.15,at=0){try{const c=ctx(),o=c.createOscillator(),g=c.createGain(),t=c.currentTime+at;o.type=type;o.frequency.value=f;g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+d)}catch(e){}}
 function play(n,x){if(!sfxOn)return;
  if(n==='click')tone(700,.05,'square',.05);
@@ -645,10 +663,11 @@ function updMenu(){book();document.querySelectorAll('.plv').forEach(e=>{const k=
 function stop(){run=false;paused=false;clearInterval(tm);clearInterval(sp);clearInterval(rt);clearTimeout(ft);$('#pause').hidden=true;stage.classList.remove('frozen')}
 function tick(){time--;playSecs++;if(time<=5&&time>0){const c=$('#cd');c.textContent=time;c.classList.remove('show');void c.offsetWidth;c.classList.add('show');play('tick',time)}$('#time').parentElement.classList.toggle('hot',time<=5);$('#time').textContent=time;$('#bar').style.width=(time/DUR*100)+'%';if(time<=0)finish()}
 function kl(){try{if(navigator.keyboard&&navigator.keyboard.lock)Promise.resolve(navigator.keyboard.lock()).catch(()=>{})}catch(e){}}
-function lockOn(){$('#tiny').textContent=lockPref?'🔒 Locked. Grown-ups: hold Esc for 3 seconds to exit.':'';if(!lockPref)return;const d=document.documentElement;if(!document.fullscreenElement&&d.requestFullscreen){try{Promise.resolve(d.requestFullscreen()).then(kl).catch(()=>{})}catch(e){}}else kl()}
+function fsEl(){return document.fullscreenElement||document.webkitFullscreenElement}
+function lockOn(){$('#tiny').textContent=lockPref?'🔒 Locked. Grown-ups: use ⚙️ Settings, or hold Esc for 3 seconds.':'';if(!lockPref)return;const d=document.documentElement,rq=d.requestFullscreen||d.webkitRequestFullscreen;if(!fsEl()&&rq){try{Promise.resolve(rq.call(d)).then(kl).catch(()=>{})}catch(e){}}else kl()}
 function pause(){if(!run)return;run=false;paused=true;clearInterval(tm);clearInterval(sp);stage.classList.add('frozen');$('#pause').hidden=false}
 function resume(){if(!paused)return;paused=false;run=true;$('#pause').hidden=true;stage.classList.remove('frozen');window.focus();lockOn();tm=setInterval(tick,1000);if(G[cur].loop)G[cur].loop();if((cur==='words'||cur==='sea')&&G[cur].lock)G[cur].pick()}
-function leave(){escT=null;if(brkOn){endBrk();show('menu')}lockPref=false;$('#lockbtn').classList.remove('on');$('#lockbtn').textContent='🔒 Lock screen: off';$('#tiny').textContent='';try{navigator.keyboard&&navigator.keyboard.unlock()}catch(e){}if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});pause()}
+function leave(){escT=null;if(brkOn){endBrk();show('menu')}lockPref=false;$('#lockbtn').classList.remove('on');$('#lockbtn').textContent='🔒 Lock screen: off';$('#tiny').textContent='';try{navigator.keyboard&&navigator.keyboard.unlock()}catch(e){}if(fsEl()){try{const x=(document.exitFullscreen||document.webkitExitFullscreen).call(document);if(x&&x.catch)x.catch(()=>{})}catch(e){}}pause()}
 function start(g){
   stop();if(playSecs>=BRK){playSecs=0;breakTime(()=>start(g));return}cur=g;lvl=prog[g];set=G[g].all?ORDER:keysFor(lvl);over=false;hits=0;miss=0;score=0;time=DUR;run=true;
   $('#lvn').textContent=lvl;$('#score').textContent=0;$('#time').textContent=DUR;$('#time').parentElement.classList.remove('hot');$('#bar').style.width='100%';upd();
@@ -696,7 +715,7 @@ $('#resume').onclick=resume;
 $('#pmenu').onclick=()=>{stop();show('menu')};
 addEventListener('blur',pause);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)pause()});
-document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&lockPref&&run)pause()});
+const fsc=()=>{if(!fsEl()&&lockPref&&run)pause()};document.addEventListener('fullscreenchange',fsc);document.addEventListener('webkitfullscreenchange',fsc);
 addEventListener('contextmenu',e=>e.preventDefault());
 addEventListener('beforeunload',e=>{if(run||paused){e.preventDefault();e.returnValue=''}});
 addEventListener('keyup',e=>{if(e.key==='Escape'){clearTimeout(escT);escT=null}});
@@ -709,7 +728,12 @@ $('#speakbtn').onclick=()=>{speakOn=!speakOn;paintSet();saveSet();if(speakOn)say
 try{const q=JSON.parse(localStorage.getItem('keypals2-set')||'{}');if(q.m===0)musicOn=false;if(q.s===0)sfxOn=false;if(q.v===0)speakOn=false;if(q.vn)vname=q.vn;if(q.vr)vrate=q.vr;if(q.be)BRK=q.be*60;if(q.bl)BRKLEN=q.bl*60;if(q.mt!=null){if(q.mt<0)mshuf=true;else mtrack=Math.min(TRK.length-1,q.mt)}if(q.mvl)mvol=q.mvl}catch(e){}
 paintSet();paintVox();fillVoices();fillTracks();try{speechSynthesis.onvoiceschanged=fillVoices}catch(e){}
 document.addEventListener('click',e=>{const b=e.target.closest('button');if(b&&!b.classList.contains('k')&&!b.classList.contains('star'))play('click')});
-['pointerdown','keydown'].forEach(ev=>addEventListener(ev,()=>{try{ctx();startMusic()}catch(e){}},{once:true}));
+const unlockEv=['touchend','pointerup','click','keydown'];
+function unlockAudio(){try{ctx();startMusic()}catch(e){}if(ac&&ac.state==='running')unlockEv.forEach(ev=>removeEventListener(ev,unlockAudio,true))}
+unlockEv.forEach(ev=>addEventListener(ev,unlockAudio,true));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&ac&&ac.state!=='running'){try{const r=ac.resume();if(r&&r.catch)r.catch(()=>{})}catch(e){}}});
+['gesturestart','gesturechange','gestureend'].forEach(ev=>document.addEventListener(ev,e=>e.preventDefault()));
+if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol))navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
 </html>
